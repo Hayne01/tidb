@@ -1,0 +1,24 @@
+name: bit-agg-decimal
+on:
+  push:
+    branches: [fix/bit-agg-decimal]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: SUM/AVG BIT type inference unit test
+        run: go test ./pkg/expression/aggregation/ -run 'TestSumAvgBitRetType' -count=1 -timeout 600s
+      - name: issue 72740 end-to-end test
+        if: ${{ !cancelled() }}
+        run: go test -tags=intest ./pkg/executor/test/issuetest/ -run 'TestIssue72740' -count=1 -timeout 900s
+      - name: aggregation and aggfuncs package regression
+        if: ${{ !cancelled() }}
+        run: |
+          go test ./pkg/expression/aggregation/ -count=1 -timeout 900s
+          go test -tags=intest ./pkg/executor/aggfuncs/ -count=1 -timeout 900s
