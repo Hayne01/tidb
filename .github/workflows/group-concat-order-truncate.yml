@@ -1,0 +1,16 @@
+name: group-concat-order-truncate
+on:
+  push:
+    branches: [fix/group-concat-order-truncate]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: group_concat regression and property tests
+        run: go test -tags=intest ./pkg/executor/aggfuncs/ -count=1 -timeout 1200s
